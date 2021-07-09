@@ -1,0 +1,102 @@
+/*  Assumptions
+    
+    *  We are actually expected to create the Game of Life Simulation
+    *  This is the same Game of Life as John Conway's Game of Life
+    *  We are allowed to choose the size and scale of the simulation
+    *  No further input of any kind is possible beyond the creation of the simulation
+    *  There is no win condition or any further tasks the simulation is required to perform
+*/
+
+//  Public variables
+public int gridSize;
+public int gridScale = 16;
+public int gridCells[];
+
+//  Sets up the grid size and scale
+void setup() {
+  size(1024, 1024);
+  gridSize = width / gridScale;
+  
+  gridCells = new int[gridSize * gridSize];
+  
+  for(int i = 0; i < gridCells.length; i++) {
+     if(random(1) < 0.5) {
+       gridCells[i] = 1;
+     } else {
+       gridCells[i] = 0;
+     }
+  }
+}
+
+//  Main Process
+void draw() {
+  drawGrid();
+  drawCells();  
+  updateCells();
+}
+
+//  Creates the gridlines for clearer edges
+void drawGrid() {
+  background(255);
+  stroke(200);
+  for(int i = 0; i < gridSize; i++) {
+    line(i * gridScale, 0, i * gridScale, height);
+    line(0, i * gridScale, width, i * gridScale);
+  }
+}
+
+//  Fills the grid with the current set of cells
+void drawCells() {
+  noStroke();
+  fill(0);
+   for(int i = 0; i < gridSize; i++) {
+      for(int j = 0; j < gridSize; j++) {
+        if(gridCells[position(i, j)] == 1) {
+          rect(i * gridScale, j * gridScale, gridScale, gridScale);
+        }
+      }
+   }
+}
+
+//  Translates co-ordinates into a position in a 1D Array
+int position(int i, int j) {
+  i = constrain(i , 0, gridSize - 1);  //  - 1 Guarantees the value will not be outside of the bounds of the array
+  j = constrain(j , 0, gridSize - 1);
+  
+  return i + j * gridSize;
+}
+
+//  Returns the number of adjacent living cells
+int numAdj(int i, int j) {
+  int num = 0;
+  
+  for(int x = -1; x <= 1; x ++) {
+    for(int y = -1; y <= 1; y ++) {
+      if(x == 0 && y == 0) continue;  //  Makes sure not count itself at centre (0, 0)
+      int a = i + x;
+      int b = j + y;
+      num += gridCells[position(a, b)];
+    }
+  }
+  return num;
+}
+
+//  Determines what the next set of Cells will look like according to the current set
+void updateCells() {
+  int[] updatedCell = gridCells.clone();  //  Creates a copy of the current set cells
+  for(int i = 0; i < gridSize; i ++) {
+    for(int j = 0; j < gridSize; j ++) {
+      int n = numAdj(i, j);
+      if(gridCells[position(i, j)] == 1) {
+        if(n < 2 || n > 3) {
+          updatedCell[position(i, j)] = 0;
+        }
+      } else {
+        if(n == 3) {
+          updatedCell[position(i, j)] = 1;
+        }
+      }
+    }
+  }
+  gridCells = updatedCell.clone();  //  
+}
